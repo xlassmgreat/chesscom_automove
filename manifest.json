@@ -1,0 +1,23 @@
+{
+  "manifest_version": 2,
+  "name": "Chesscm Automove",
+  "version": "0.1",
+  "description": "Automover for Chesscom",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "chesscom@automove.org"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.chess.com/play/computer"],
+      "js": ["mover.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "background": {
+    "scripts": ["background-wrapper.js"],
+    "persistent": true
+  },
+  "permissions": ["nativeMessaging"]
+}
