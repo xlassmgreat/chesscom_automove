@@ -2,7 +2,7 @@
 Automover for chesscom on Firefox
 
 ## Installtion
-This project is still under development. It is not a well made plugin yet. If you want to try it, [load it as a temporary plugin](https://extensionworkshop.com/documentation/develop/temporary-installation-in-firefox/).
+This project is still under development. It is not a well made plugin yet. If you want to try it, use the .xpi file provided in the [releases](https://github.com/xlassmgreat/chesscom_automove/releases/).
 
 It has two dependencies: [Chess.com Movehelper](https://addons.mozilla.org/en-US/firefox/addon/chess-com-keyboard/) and [Eeing](https://github.com/xlassmgreat/eeing). Make sure you install both.
 
