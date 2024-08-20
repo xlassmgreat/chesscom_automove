@@ -7,4 +7,4 @@ This project is still under development. It is not a well made plugin yet. If yo
 It has two dependencies: [Chess.com Movehelper](https://addons.mozilla.org/en-US/firefox/addon/chess-com-keyboard/) and [Eeing](https://github.com/xlassmgreat/eeing). Make sure you install both.
 
 ## Usage
-This only works on the URL https://www.chess.com/play/computer and nothing else. Press Control to start playing (that will remain the keybinding until something more permanent is decided). Make sure your move notation in Chesscom is set to Text, and not Figurine.
+The plugin is activated in all URLs starting with https://www.chess.com/play/. Press e to connect to engine and transfer moves to the board. For subsequent matches (if you haven't reloaded the page), press s instead (this won't open a new connection with the native app and engine). Make sure your move notation in Chesscom is set to Text, and not Figurine.

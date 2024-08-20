@@ -1,86 +1,80 @@
 var cchelper;
-var vml;
+var port;
+var i;
 
 document.addEventListener("keyup", (e) => {
-  cchelper = document.getElementById("ccHelper-input");
-  vml = document.getElementsByClassName("play-controller-moveList")[0];
-  if (e.key === "Control") {
-    setup();
-    run();
-  }
+	cchelper = document.getElementById("ccHelper-input");
+	if (e.key === "e") {
+		connectPort();
+		setup();
+		run();
+	} else if (e.key === "s") {
+		setup();
+	}
 })
 
 function dispatchMove(move) {
-  cchelper.value = move;
-  cchelper.dispatchEvent(new KeyboardEvent('keydown', {keyCode: 13}));
+	cchelper.value = move;
+	cchelper.dispatchEvent(new KeyboardEvent('keydown', { keyCode: 13 }));
 }
-var port;
 
 function connectPort() {
-  port = browser.runtime.connect();
+	console.log("Connecting to native app Eeing.");
+	port = browser.runtime.connect();
 }
 
 function disconnectPort() {
-  port.disconnect();
+	port.disconnect();
 }
 
 function setup() {
-  console.log("Connecting to native app.")
-  connectPort();
+	i = 0;
+	port.postMessage({ cmd: "pos", fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1" }); // Set the board
 
-  port.postMessage({cmd: "pos", fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"}); // Set the board
+	var moves = [];
 
-  var moves = [];
-
-  // Collect all previously played moves
-  for (let i = 0; i < vml.childNodes.length; i++) {
-    let move = vml.childNodes[i].childNodes;
-    moves.push(move[1].firstChild.nodeValue);
-    if (move[2] != null) { // The second half-move might not be played yet
-      moves.push(move[2].firstChild.nodeValue);
-    }
-  }
-  port.postMessage({cmd: "pos", moves: moves});
-  port.postMessage({cmd: "go"});
+	// Collect all previously played moves
+	let sidebar_moves = document.getElementsByClassName("main-line-ply");
+	for (let move of sidebar_moves) {
+		moves.push(move.innerText);
+	}
+	port.postMessage({ cmd: "pos", moves: moves });
+	port.postMessage({ cmd: "go" });
 }
 
+
 function run() {
-  let i = 0;
-  let prev = null;
-  let mutobs;
-  mutobs = new MutationObserver((list) => {
-    for (mutation in list) {
-      if (vml.lastChild == null) {return} // happens between games; just return if it has disappeared
-      let move = vml.lastChild.lastChild;
-      if (move.classList.contains("game-result")) { return } // Game has ended
+	let prev = null;
+	let mutobs;
+	mutobs = new MutationObserver((list) => {
+		for (mutation in list) {
+			let moves = document.getElementsByClassName("main-line-ply");
+			if (moves.length == 0) { return } // happens between games; just return if it has disappeared
+			if (document.getElementsByClassName("game-result").length != 0) { return }
 
-      if (move == prev) {return;}
-      prev = move;
-      move = move.firstChild.nodeValue;
-      console.log(move);
+			let move = moves[moves.length - 1];
 
-      if (move.at(-1) == "#" || move[1] == "/") { // Former means checkmate; later means draw.
-        console.log("Game ended");
-        mutobs.disconnect();
-        disconnectPort();
-        return; // no move to play
-      }
+			if (move == prev) { return; }
+			prev = move;
+			move = move.innerText;
+			console.log(move);
 
-      
-      port.postMessage({cmd: "pos", moves: [move]});
-      if (i % 2 != 0) { // Only "go" after their moves, not ours.
-        port.postMessage({cmd: "go"});
-      }
-      i++;
-    }
-  })
-  mutobs.observe(vml, {childList: true, subtree: true});
+			port.postMessage({ cmd: "pos", moves: [move] });
+			if (i % 2 != 0) { // Only "go" after their moves, not ours.
+				port.postMessage({ cmd: "go" });
+			}
+			i++;
+		}
+	})
 
-  port.onMessage.addListener((msg) => {
-    dispatchMove(msg.bestmove);
-  });
+	let vml = document.getElementsByClassName("play-controller-moveList")[0].firstChild;
+	mutobs.observe(vml, { childList: true, subtree: true });
 
-  port.onDisconnect.addListener((p) => {
-    console.log("Native application Eeing unexpectedly disconnected.")
-  })
+	port.onMessage.addListener((msg) => {
+		dispatchMove(msg.bestmove);
+	});
+
+	port.onDisconnect.addListener(() => {
+		console.log("Native application Eeing unexpectedly disconnected.")
+	})
 }

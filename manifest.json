@@ -10,7 +10,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://www.chess.com/play/computer"],
+      "matches": ["https://www.chess.com/play/*"],
       "js": ["mover.js"],
       "run_at": "document_end"
     }
